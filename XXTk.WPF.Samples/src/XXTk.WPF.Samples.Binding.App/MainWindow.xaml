@@ -1,0 +1,39 @@
+﻿<Window x:Class="XXTk.WPF.Samples.BindingSample.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:XXTk.WPF.Samples.BindingSample.App"
+        mc:Ignorable="d"
+        Title="MainWindow"
+        Height="450"
+        Width="800"
+        WindowStartupLocation="CenterScreen">
+    <Window.DataContext>
+        <local:MainWindowViewModel />
+    </Window.DataContext>
+    <StackPanel>
+        <GroupBox Header="通过 ElementName 绑定">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="请输入任意文本：" Target="{Binding ElementName=Tbx1}" />
+                <TextBox x:Name="Tbx1"
+                         Width="100"
+                         VerticalContentAlignment="Center" />
+                <TextBlock Text="{Binding Text, ElementName=Tbx1, StringFormat='您输入的内容为：{0}'}"
+                           VerticalAlignment="Center"
+                           Margin="20,0,0,0" />
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="直接绑定到 DataContext 的属性">
+            <TextBlock Text="{Binding Name, StringFormat='我是：{0}'}" />
+        </GroupBox>
+        <GroupBox Header="绑定静态变量">
+            <StackPanel Orientation="Horizontal">
+                <StackPanel>
+                    <TextBlock Text="用户名：" />
+                    <TextBlock Text="{x:Static local:AppRuntimeInfo.UserName}" Foreground="{x:Static local:AppRuntimeInfo+MyBrushes.Red}" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+    </StackPanel>
+</Window>
