@@ -12,27 +12,120 @@
     <Window.DataContext>
         <local:MainWindowViewModel />
     </Window.DataContext>
+    <Window.Resources>
+        <Style TargetType="GroupBox">
+            <Setter Property="Margin" Value="10,0,10,10" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="HeaderTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock FontWeight="Bold" Text="{Binding}" />
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!--
+        Binding绑定核心参数有2个，分别为 Source 和 Path：
+        * Source：绑定源，即要绑定哪个对象的数据
+        * Path：绑定路径，即相对于绑定源的绑定路径
+        例如 Source 为当前Window的 DataContext，Path为 Name，绑定的完整路径为 DataContext.Name
+    -->
     <StackPanel>
-        <GroupBox Header="通过 ElementName 绑定">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="请输入任意文本：" Target="{Binding ElementName=Tbx1}" />
-                <TextBox x:Name="Tbx1"
-                         Width="100"
-                         VerticalContentAlignment="Center" />
-                <TextBlock Text="{Binding Text, ElementName=Tbx1, StringFormat='您输入的内容为：{0}'}"
-                           VerticalAlignment="Center"
-                           Margin="20,0,0,0" />
-            </StackPanel>
-        </GroupBox>
-        <GroupBox Header="直接绑定到 DataContext 的属性">
-            <TextBlock Text="{Binding Name, StringFormat='我是：{0}'}" />
-        </GroupBox>
-        <GroupBox Header="绑定静态变量">
-            <StackPanel Orientation="Horizontal">
+        <GroupBox Header="引用">
+            <GroupBox Header="引用静态变量">
+                <!-- 通过‘+’拼接类型，通过‘.’拼接属性 -->
+                <!-- 注意，x:Static 用于【引用】静态变量（注意不是绑定），若后续该静态变量自身（不包括其属性）发生了更改，即使有变更通知，由于x:Static 并不订阅变更通知，所以控件也不会更新，相当于 Binding Mode=OneTime -->
+                <!-- 静态变量的属性属于实例变量而不是静态变量 -->
                 <StackPanel>
-                    <TextBlock Text="用户名：" />
-                    <TextBlock Text="{x:Static local:AppRuntimeInfo.UserName}" Foreground="{x:Static local:AppRuntimeInfo+MyBrushes.Red}" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="用户名：" />
+                        <TextBlock Text="{x:Static local:AppRuntimeInfo.UserName}" Foreground="{x:Static local:AppRuntimeInfo+MyBrushes.HalfRed}" />
+                        <!-- 完整语法 -->
+                        <!--<TextBlock Text="{x:Static Member=local:AppRuntimeInfo.UserName}" Foreground="{x:Static Member=local:AppRuntimeInfo+MyBrushes.HalfRed}" />-->
+
+                        <!-- 当省略Path或Path为“.”时，表示绑定到整个Source -->
+                        <TextBlock Text="{Binding Source={x:Static local:AppRuntimeInfo.UserName}, StringFormat='我是：{0}'}" />
+                        <!-- 完整语法 -->
+                        <!--<TextBlock Text="{Binding Path=., Source={x:Static local:AppRuntimeInfo.UserName}, StringFormat='我是：{0}'}" />-->
+
+                        <!-- 这样写效果与上方一致 -->
+                        <TextBlock Text="{Binding Path=(local:AppRuntimeInfo.UserName), Mode=OneTime, StringFormat='我是：{0}'}" />
+                    </StackPanel>
                 </StackPanel>
+            </GroupBox>
+        </GroupBox>
+        <GroupBox Header="绑定" Margin="0,20,0,0">
+            <StackPanel>
+                <GroupBox Header="通过元素名绑定">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="请输入任意文本：" Target="{Binding ElementName=Tbx1}" />
+                        <TextBox x:Name="Tbx1"
+                                 Width="100"
+                                 VerticalContentAlignment="Center" />
+                        <!-- 绑定元素名为 Tbx1 的控件的 Text 属性 -->
+                        <TextBlock Text="{Binding Text, ElementName=Tbx1, StringFormat='您输入的内容为：{0}'}"
+                                   VerticalAlignment="Center"
+                                   Margin="20,0,0,0" />
+                        <!-- 完整语法 -->
+                        <!--<TextBlock Text="{Binding Path=Text, ElementName=Tbx1, StringFormat='您输入的内容为：{0}'}" />-->
+
+                        <!-- 还可以通过 x:Reference 来指定元素名，不过并不推荐 -->
+                        <TextBlock Text="{Binding Text, Source={x:Reference Tbx1}, StringFormat='您输入的内容为：{0}'}"
+                                   VerticalAlignment="Center"
+                                   Margin="20,0,0,0" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="直接绑定到 DataContext 的属性">
+                    <!-- 当未设置 Source 时，默认向上寻找父级的 DataContext，将第一个找到的 DataContext 作为 Source -->
+
+                    <StackPanel>
+                        <!-- 绑定到 DataContext.Name -->
+                        <TextBlock Text="{Binding Name, StringFormat='我是：{0}'}" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="绑定其他变量">
+                    <!-- 通过‘+’拼接类型，通过‘.’拼接属性 -->
+                    <!-- 若显示不支持嵌套的类型，或指定了local:等命名空间，只需要显示给Path赋值，然后加个括号就好了 -->
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="用户名：" />
+                                <TextBox Text="{Binding Path=(local:AppRuntimeInfo.UserName), UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="{Binding Path=(local:AppRuntimeInfo.UserName), UpdateSourceTrigger=PropertyChanged, StringFormat='我是：{0}'}" />
+                                <Button Command="{Binding ShowAppRuntimeInfoUserNameCommand}"
+                                        Content="显示最新用户名"
+                                        Margin="10,0,0,0" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="应用版本：" />
+                                <!-- 这样写，即使 AppVersion 自身发生了更改，也会接到通知并更新数据 -->
+                                <TextBlock Text="{Binding Path=(local:AppRuntimeInfo.AppVersion).Version}" />
+                                <!-- 这样写，由于使用了 x：Static，所以当 AppVersion 自身发生了更改时，无法接收到通知，因此不会更新数据 -->
+                                <!-- 当 AppVersion 自身未发生更改时，更新 AppVersion 下的属性仍然会更新UI，一旦 AppVersion 自身发生了更改（重新New），则不会再更新UI -->
+                                <TextBox Text="{Binding Version, Source={x:Static local:AppRuntimeInfo.AppVersion}}" />
+                                <Button Command="{Binding NewAppVersionCommand}"
+                                        Content="重新New应用版本"
+                                        Margin="10,0,0,0" />
+                                <Button Command="{Binding ChangeAppVersionCommand}"
+                                        Content="变更应用版本"
+                                        Margin="10,0,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="多重绑定">
+                    <TextBlock>
+                        <TextBlock.Text>
+                            <!-- 如果占位符在开头，则必须在之前添加一个空的大括号 -->
+                            <MultiBinding StringFormat="{}{0} - {1}">
+                                <Binding Path="(local:AppRuntimeInfo.UserName)" />
+                                <Binding Path="(local:AppRuntimeInfo.AppVersion).Version" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </GroupBox>
             </StackPanel>
         </GroupBox>
     </StackPanel>
