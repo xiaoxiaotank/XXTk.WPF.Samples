@@ -24,9 +24,17 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="SampleButtonStyle" TargetType="Button">
+            <Setter Property="FontSize" Value="12" />
+        </Style>
     </Window.Resources>
 
     <!--
+        本项目将演示绑定、引用等相关功能
+        * 绑定：
+        * 引用：
+        
         Binding绑定核心参数有2个，分别为 Source 和 Path：
         * Source：绑定源，即要绑定哪个对象的数据
         * Path：绑定路径，即相对于绑定源的绑定路径
@@ -34,27 +42,42 @@
     -->
     <StackPanel>
         <GroupBox Header="引用">
-            <GroupBox Header="引用静态变量">
-                <!-- 通过‘+’拼接类型，通过‘.’拼接属性 -->
-                <!-- 注意，x:Static 用于【引用】静态变量（注意不是绑定），若后续该静态变量自身（不包括其属性）发生了更改，即使有变更通知，由于x:Static 并不订阅变更通知，所以控件也不会更新，相当于 Binding Mode=OneTime -->
-                <!-- 静态变量的属性属于实例变量而不是静态变量 -->
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="用户名：" />
-                        <TextBlock Text="{x:Static local:AppRuntimeInfo.UserName}" Foreground="{x:Static local:AppRuntimeInfo+MyBrushes.HalfRed}" />
-                        <!-- 完整语法 -->
-                        <!--<TextBlock Text="{x:Static Member=local:AppRuntimeInfo.UserName}" Foreground="{x:Static Member=local:AppRuntimeInfo+MyBrushes.HalfRed}" />-->
+            <StackPanel>
+                <GroupBox Header="引用静态变量">
+                    <!-- 通过‘+’拼接类型，通过‘.’拼接属性 -->
+                    <!-- 注意，x:Static 用于【引用】静态变量（注意不是绑定），若后续该静态变量自身（不包括其属性）发生了更改，即使有变更通知，由于x:Static 并不订阅变更通知，所以控件也不会更新，相当于 Binding Mode=OneTime -->
+                    <!-- 静态变量的属性属于实例变量而不是静态变量 -->
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="用户名：" />
+                            <TextBlock Text="{x:Static local:AppRuntimeInfo.UserName}" Foreground="{x:Static local:AppRuntimeInfo+MyBrushes.HalfRed}" />
+                            <!-- 完整语法 -->
+                            <!--<TextBlock Text="{x:Static Member=local:AppRuntimeInfo.UserName}" Foreground="{x:Static Member=local:AppRuntimeInfo+MyBrushes.HalfRed}" />-->
 
-                        <!-- 当省略Path或Path为“.”时，表示绑定到整个Source -->
-                        <TextBlock Text="{Binding Source={x:Static local:AppRuntimeInfo.UserName}, StringFormat='我是：{0}'}" />
-                        <!-- 完整语法 -->
-                        <!--<TextBlock Text="{Binding Path=., Source={x:Static local:AppRuntimeInfo.UserName}, StringFormat='我是：{0}'}" />-->
+                            <!-- 当省略Path或Path为“.”时，表示绑定到整个Source -->
+                            <TextBlock Text="{Binding Source={x:Static local:AppRuntimeInfo.UserName}, StringFormat='我是：{0}'}" />
+                            <!-- 完整语法 -->
+                            <!--<TextBlock Text="{Binding Path=., Source={x:Static local:AppRuntimeInfo.UserName}, StringFormat='我是：{0}'}" />-->
 
-                        <!-- 这样写效果与上方一致 -->
-                        <TextBlock Text="{Binding Path=(local:AppRuntimeInfo.UserName), Mode=OneTime, StringFormat='我是：{0}'}" />
+                            <!-- 这样写效果与上方一致 -->
+                            <TextBlock Text="{Binding Path=(local:AppRuntimeInfo.UserName), Mode=OneTime, StringFormat='我是：{0}'}" />
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
-            </GroupBox>
+                </GroupBox>
+                <GroupBox Header="引用资源">
+                    <!--
+                        * StaticResource：静态资源引用，即资源应用之后，忽略资源后续的变化，相比动态资源引用效率更高
+                        * DynamicResource：动态资源引用，即资源应用之后，若后续资源发生变化，会即时更新
+                    -->
+                    <StackPanel>
+                        <Button Style="{StaticResource SampleButtonStyle}" Content="StaticResource Button" />
+                        <Button x:Name="BtnDynamic"
+                                Style="{DynamicResource SampleButtonStyle}"
+                                Content="DynamicResource Button"
+                                Click="BtnDynamic_Click" />
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
         </GroupBox>
         <GroupBox Header="绑定" Margin="0,20,0,0">
             <StackPanel>

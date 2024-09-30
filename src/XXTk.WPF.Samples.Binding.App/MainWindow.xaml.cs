@@ -20,5 +20,14 @@ namespace XXTk.WPF.Samples.BindingSample.App
         {
             InitializeComponent();
         }
+
+        private void BtnDynamic_Click(object sender, RoutedEventArgs e)
+        {
+            var style = new Style { TargetType = typeof(Button) };
+            style.Setters.Add(new Setter { Property = Button.FontSizeProperty, Value = (double)Random.Shared.Next(10, 30) });
+
+            // 替换掉原来的资源
+            Resources["SampleButtonStyle"] = style;
+        }
     }
 }
