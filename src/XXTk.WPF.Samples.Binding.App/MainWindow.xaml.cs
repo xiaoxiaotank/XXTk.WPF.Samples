@@ -26,7 +26,7 @@ namespace XXTk.WPF.Samples.BindingSample.App
             var style = new Style { TargetType = typeof(Button) };
             style.Setters.Add(new Setter { Property = Button.FontSizeProperty, Value = (double)Random.Shared.Next(10, 30) });
 
-            // 替换掉原来的资源1
+            // 替换掉原来的资源2
             Resources["SampleButtonStyle"] = style;
         }
     }
